@@ -46,6 +46,12 @@ namespace LeaveManagementWebApp.Repository
             throw new NotImplementedException();
         }
 
+        public bool Exists(int id)
+        {
+            var exists = _db.LeaveTypes.Any(type => type.Id == id);
+            return exists;
+        }
+
         public bool Save()
         {
             //if SaveChanges returns less than one change means something has gone
