@@ -149,7 +149,7 @@ namespace LeaveManagementWebApp.Controllers
         // POST: LeaveTypesController1/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, LeaveTypeViewModel? model)
+        public ActionResult Delete(int id, LeaveTypeViewModel model)
         {
             try
             {

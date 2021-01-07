@@ -35,6 +35,9 @@ namespace LeaveManagementWebApp
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
 
+            //Razor Runtime Compilation wasnt working without installing package  
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
             //Add references for Repository and Contracts to Startup file
             services.AddScoped<ILeaveTypeRepository, LeaveTypeRepository>();
             services.AddScoped<ILeaveAllocationRepository, LeaveAllocationRepository>();
