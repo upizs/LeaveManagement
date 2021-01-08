@@ -2,6 +2,7 @@
 using LeaveManagementWebApp.Contracts;
 using LeaveManagementWebApp.Data;
 using LeaveManagementWebApp.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,6 +12,8 @@ using System.Threading.Tasks;
 
 namespace LeaveManagementWebApp.Controllers
 {
+    //Authorize all the controller to restrict access for all the actions
+    [Authorize(Roles = "Administrator")]
     public class LeaveTypesController : Controller
     {
         private readonly ILeaveTypeRepository _repo;
@@ -25,6 +28,7 @@ namespace LeaveManagementWebApp.Controllers
 
 
         // GET: LeaveTypesController
+        [Authorize]
         public ActionResult Index()
         {
             var leavetypes = _repo.FindAll().ToList();
@@ -171,5 +175,7 @@ namespace LeaveManagementWebApp.Controllers
                 return View(model);
             }
         }
+
+        
     }
 }
