@@ -19,5 +19,7 @@ namespace LeaveManagementWebApp.Data
         [ForeignKey("LeaveTypeId")]
         public LeaveType LeaveType { get; set; }
         public int LeaveTypeId { get; set; }
+        //Curent working year
+        public int Period { get; set; }
     }
 }

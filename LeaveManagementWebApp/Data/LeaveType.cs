@@ -13,6 +13,8 @@ namespace LeaveManagementWebApp.Data
         [Required]
         [MaxLength(100)]
         public string Name { get; set; }
+        //How many days available for one person for one leaveType in year
+        public int DefaultDays { get; set; }
 
         public DateTime DateCreated { get; set; }
 
