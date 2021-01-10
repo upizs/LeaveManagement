@@ -28,7 +28,7 @@ namespace LeaveManagementWebApp.Controllers
 
 
         // GET: LeaveTypesController
-        [Authorize]
+        
         public ActionResult Index()
         {
             var leavetypes = _repo.FindAll().ToList();
