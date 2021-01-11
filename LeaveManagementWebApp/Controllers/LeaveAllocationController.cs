@@ -76,6 +76,24 @@ namespace LeaveManagementWebApp.Controllers
         {
             var employees = _userManager.GetUsersInRoleAsync("Employee").Result;
             var model = _mapper.Map<List<EmployeeViewModel>>(employees);
+
+            return View(model);
+        }
+
+        public ActionResult Details(string id)
+        {
+            var employee = _userManager.FindByIdAsync(id).Result;
+            var mappedEmployee = _mapper.Map<EmployeeViewModel>(employee);
+            var allocations = _allocationRepo.GetLeaveAllocationsByEmployee(id);
+            var mappedAllocations = _mapper.Map<List<LeaveAllocationViewModel>>(allocations);
+
+            var model = new ViewAllocationsViewModel
+            {
+                Employee = mappedEmployee,
+                LeaveAllocations = mappedAllocations,
+
+            };
+
             return View(model);
         }
 
