@@ -46,7 +46,7 @@ namespace LeaveManagementWebApp
             services.AddAutoMapper(typeof(Maps));
 
             //Set up the softest password options for easier registretion
-            services.AddDefaultIdentity<IdentityUser>(options => { 
+            services.AddDefaultIdentity<Employee>(options => { 
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false; 
                 options.Password.RequireDigit = false;
@@ -62,7 +62,7 @@ namespace LeaveManagementWebApp
         public void Configure(
             IApplicationBuilder app, 
             IWebHostEnvironment env,
-            UserManager<IdentityUser> userManager,
+            UserManager<Employee> userManager,
             RoleManager<IdentityRole> roleManager
             )
         {

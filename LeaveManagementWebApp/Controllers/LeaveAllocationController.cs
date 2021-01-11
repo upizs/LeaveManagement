@@ -18,14 +18,14 @@ namespace LeaveManagementWebApp.Controllers
         public readonly ILeaveTypeRepository _typeRepo;
         private readonly ILeaveAllocationRepository _allocationRepo;
         private readonly IMapper _mapper;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<Employee> _userManager;
 
         //Dependendy injuction
         public LeaveAllocationController(
             ILeaveTypeRepository typeRepo,
             ILeaveAllocationRepository allocationRepo, 
             IMapper mapper,
-            UserManager<IdentityUser> userManager)
+            UserManager<Employee> userManager)
         {
             _typeRepo = typeRepo;
             _allocationRepo = allocationRepo;
@@ -70,6 +70,13 @@ namespace LeaveManagementWebApp.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        public ActionResult ListEmployees()
+        {
+            var employees = _userManager.GetUsersInRoleAsync("Employee").Result;
+            var model = _mapper.Map<List<EmployeeViewModel>>(employees);
+            return View(model);
         }
 
         
