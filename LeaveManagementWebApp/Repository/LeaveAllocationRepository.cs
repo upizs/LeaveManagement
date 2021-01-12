@@ -29,12 +29,18 @@ namespace LeaveManagementWebApp.Repository
 
         public ICollection<LeaveAllocation> FindAll()
         {
-            return _db.LeaveAllocations.Include(allocation => allocation.LeaveType).ToList();
+            return _db.LeaveAllocations
+                .Include(allocation => allocation.LeaveType)
+                .Include(allocation => allocation.Employee)
+                .ToList();
         }
 
         public LeaveAllocation FindById(int id)
         {
-            return _db.LeaveAllocations.Find(id);
+            return _db.LeaveAllocations
+                .Include(allocation => allocation.LeaveType)
+                .Include(allocation => allocation.Employee)
+                .FirstOrDefault(allocation => allocation.Id == id);
         }
 
         public bool Exists(int id)
@@ -54,7 +60,7 @@ namespace LeaveManagementWebApp.Repository
             _db.LeaveAllocations.Update(entity);
             return Save();
         }
-        //
+        //using FindAll() method instead of direct _db becase FindAll has .Include function
         public bool CheckAllocation(int leaveTypeId, string employeeId)
         {
             var period = DateTime.Now.Year;

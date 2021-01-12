@@ -97,6 +97,41 @@ namespace LeaveManagementWebApp.Controllers
             return View(model);
         }
 
-        
+        public ActionResult Edit(int id)
+        {
+            var leaveAllocation = _allocationRepo.FindById(id);
+            var model = _mapper.Map<EditLeaveAllocationViewModel>(leaveAllocation);
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(LeaveTypeViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+                var leaveAllocation = _mapper.Map<LeaveAllocation>(model);
+                var isSuccess = _allocationRepo.Update(leaveAllocation);
+                if (!isSuccess)
+                {
+                    ModelState.AddModelError("", "Something went wrong..");
+                    return View(model);
+                }
+
+                return RedirectToAction(nameof(Details));
+
+            }
+            catch
+            {
+                ModelState.AddModelError("", "Something went wrong..");
+                return View(model);
+            }
+        }
+
     }
 }
