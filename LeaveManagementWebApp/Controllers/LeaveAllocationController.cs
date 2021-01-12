@@ -107,7 +107,7 @@ namespace LeaveManagementWebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(LeaveTypeViewModel model)
+        public ActionResult Edit(EditLeaveAllocationViewModel model)
         {
             try
             {
@@ -115,20 +115,23 @@ namespace LeaveManagementWebApp.Controllers
                 {
                     return View(model);
                 }
-                var leaveAllocation = _mapper.Map<LeaveAllocation>(model);
+                //had to use this method, because mapping was causing an error
+                var leaveAllocation = _allocationRepo.FindById(model.Id);
+                leaveAllocation.NumberOfDays = model.NumberOfDays;
+
                 var isSuccess = _allocationRepo.Update(leaveAllocation);
                 if (!isSuccess)
                 {
-                    ModelState.AddModelError("", "Something went wrong..");
+                    ModelState.AddModelError("", "Error While Saving");
                     return View(model);
                 }
 
-                return RedirectToAction(nameof(Details));
+                return RedirectToAction(nameof(Details), new {id = model.EmployeeId });
 
             }
             catch
             {
-                ModelState.AddModelError("", "Something went wrong..");
+                ModelState.AddModelError("", "Error While Saving");
                 return View(model);
             }
         }
