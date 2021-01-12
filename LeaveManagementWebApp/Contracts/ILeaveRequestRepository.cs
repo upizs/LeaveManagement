@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LeaveManagementWebApp.Contracts
 {
-    public interface ILeaveHistoryRepository : IRepositoryBase<LeaveHistory>
+    public interface ILeaveRequestRepository : IRepositoryBase<LeaveRequest>
     {
     }
 }
