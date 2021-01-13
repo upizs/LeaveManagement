@@ -44,14 +44,14 @@ namespace LeaveManagementWebApp.Models
 
     public class CreateLeaveRequestViewModel
     {
+        //Changed Dates to Strings because there was an issue with DatePicker
+        //Will Convert it in Controller
         [Display(Name ="Start Date")]
         [Required]
-        [DataType(DataType.Text)]
-        public DateTime StartDate { get; set; }
+        public string StartDate { get; set; }
         [Display(Name = "End Date")]
         [Required]
-        [DataType(DataType.Text)]
-        public DateTime EndDate { get; set; }
+        public string EndDate { get; set; }
         public IEnumerable<SelectListItem> LeaveTypes { get; set; }
         public int LeaveTypeId { get; set; }
     }

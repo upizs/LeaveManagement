@@ -92,6 +92,10 @@ namespace LeaveManagementWebApp.Controllers
 
             try
             {
+                //Converted toDateTime to use it for validation and mapping purposes
+                var startDate = DateTime.ParseExact(model.StartDate, "MM/dd/yyyy", null);
+                var endDate = DateTime.ParseExact(model.EndDate, "MM/dd/yyyy", null);
+
                 //has to create the SelectListItem, 
                 //becasue otherwise the model would 
                 //return empty list in case of fail
@@ -113,7 +117,7 @@ namespace LeaveManagementWebApp.Controllers
                     return View(model);
                 }
 
-                if (DateTime.Compare(model.StartDate, model.EndDate) > 1)
+                if (DateTime.Compare(startDate, endDate) > 1)
                 {
                     ModelState.AddModelError("", "Start Date cannot be further in the future than the End Date");
                     return View(model);
@@ -121,7 +125,7 @@ namespace LeaveManagementWebApp.Controllers
 
                 var employee = _userManager.GetUserAsync(User).Result;
                 var allocation = _allocationRepo.GetLeaveAllocationsByEmployeeAndType(employee.Id, model.LeaveTypeId);
-                int daysRequested = (int)(model.EndDate.Date - model.StartDate.Date).TotalDays;
+                int daysRequested = (int)(endDate.Date - startDate.Date).TotalDays;
 
                 if (daysRequested > allocation.NumberOfDays) 
                 {
@@ -135,9 +139,10 @@ namespace LeaveManagementWebApp.Controllers
                 //Create a model that is properly mappable
                 var leaveRequestModel = new LeaveRequestViewModel
                 {
+                    LeaveTypeId = model.LeaveTypeId,
                     RequestingEmployeeId = employee.Id,
-                    StartDate = model.StartDate,
-                    EndDate = model.EndDate,
+                    StartDate = startDate,
+                    EndDate = endDate,
                     Approved = null,
                     DateRequested = DateTime.Now,
                     DateActioned = DateTime.Now
