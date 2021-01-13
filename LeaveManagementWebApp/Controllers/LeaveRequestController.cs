@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace LeaveManagementWebApp.Controllers
         #region dependencies
 
         private readonly ILeaveRequestRepository _leaveRequestRepo;
+        private readonly ILeaveTypeRepository _leaveTypeRepo;
         private readonly ILeaveAllocationRepository _allocationRepo;
         private readonly IMapper _mapper;
         private readonly UserManager<Employee> _userManager;
@@ -26,11 +28,13 @@ namespace LeaveManagementWebApp.Controllers
         //Dependendy injuction
         public LeaveRequestController(
             ILeaveRequestRepository leaveRequestRepo,
+            ILeaveTypeRepository leaveTypeRepo,
             ILeaveAllocationRepository allocationRepo,
             IMapper mapper,
             UserManager<Employee> userManager)
         {
             _leaveRequestRepo = leaveRequestRepo;
+            _leaveTypeRepo = leaveTypeRepo;
             _allocationRepo = allocationRepo;
             _mapper = mapper;
             _userManager = userManager;
@@ -65,21 +69,95 @@ namespace LeaveManagementWebApp.Controllers
         // GET: LeaveRequestController/Create
         public ActionResult Create()
         {
-            return View();
+            var leaveTypes = _leaveTypeRepo.FindAll();
+            var leaveTypesItems = leaveTypes.Select(type => new SelectListItem { 
+                Text = type.Name,
+                Value = type.Id.ToString()
+            });
+
+            var model = new CreateLeaveRequestViewModel
+            {
+                LeaveTypes = leaveTypesItems
+            };
+
+            return View(model);
         }
 
         // POST: LeaveRequestController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(CreateLeaveRequestViewModel model)
         {
+            
+
             try
             {
-                return RedirectToAction(nameof(Index));
+                //has to create the SelectListItem, 
+                //becasue otherwise the model would 
+                //return empty list in case of fail
+
+                var leaveTypes = _leaveTypeRepo.FindAll();
+                var leaveTypesItems = leaveTypes.Select(type => new SelectListItem
+                {
+                    Text = type.Name,
+                    Value = type.Id.ToString()
+                });
+
+                model.LeaveTypes = leaveTypesItems;
+
+                //Check if valid
+                #region Validation
+
+                if (!ModelState.IsValid)
+                {
+                    return View(model);
+                }
+
+                if (DateTime.Compare(model.StartDate, model.EndDate) > 1)
+                {
+                    ModelState.AddModelError("", "Start Date cannot be further in the future than the End Date");
+                    return View(model);
+                }
+
+                var employee = _userManager.GetUserAsync(User).Result;
+                var allocation = _allocationRepo.GetLeaveAllocationsByEmployeeAndType(employee.Id, model.LeaveTypeId);
+                int daysRequested = (int)(model.EndDate.Date - model.StartDate.Date).TotalDays;
+
+                if (daysRequested > allocation.NumberOfDays) 
+                {
+                    ModelState.AddModelError("", "You have requested more days for this allocation than you have. "
+                        + "You have " + allocation.NumberOfDays.ToString() + " days left");
+                    return View(model);
+                }
+
+                #endregion
+
+                //Create a model that is properly mappable
+                var leaveRequestModel = new LeaveRequestViewModel
+                {
+                    RequestingEmployeeId = employee.Id,
+                    StartDate = model.StartDate,
+                    EndDate = model.EndDate,
+                    Approved = null,
+                    DateRequested = DateTime.Now,
+                    DateActioned = DateTime.Now
+                    
+                };
+                var leaveRequest = _mapper.Map<LeaveRequest>(leaveRequestModel);
+                var success = _leaveRequestRepo.Create(leaveRequest);
+
+                if (!success)
+                {
+                    ModelState.AddModelError("", "Something went wrong");
+                    return View(model);
+                }
+                //Redirects to home index, because leaverequest index is admin only
+                return RedirectToAction(nameof(Index), "Home");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                ModelState.AddModelError("", "Something went wrong");
+                return View(model);
             }
         }
 

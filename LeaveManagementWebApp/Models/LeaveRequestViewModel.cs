@@ -41,4 +41,18 @@ namespace LeaveManagementWebApp.Models
         public List<LeaveRequestViewModel> LeaveRequests { get; set; }
 
     }
+
+    public class CreateLeaveRequestViewModel
+    {
+        [Display(Name ="Start Date")]
+        [Required]
+        [DataType(DataType.Text)]
+        public DateTime StartDate { get; set; }
+        [Display(Name = "End Date")]
+        [Required]
+        [DataType(DataType.Text)]
+        public DateTime EndDate { get; set; }
+        public IEnumerable<SelectListItem> LeaveTypes { get; set; }
+        public int LeaveTypeId { get; set; }
+    }
 }
