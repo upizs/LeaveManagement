@@ -55,4 +55,5 @@ namespace LeaveManagementWebApp.Models
         public IEnumerable<SelectListItem> LeaveTypes { get; set; }
         public int LeaveTypeId { get; set; }
     }
+
 }

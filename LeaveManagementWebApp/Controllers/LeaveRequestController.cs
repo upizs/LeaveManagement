@@ -60,6 +60,28 @@ namespace LeaveManagementWebApp.Controllers
             return View(model);
         }
 
+        public ActionResult MyLeave()
+        {
+            //Find and get all resources
+            var user = _userManager.GetUserAsync(User).Result;
+            var leaveRequests = _leaveRequestRepo.FindByEmployee(user.Id);
+            var leaveAllocations = _allocationRepo.GetLeaveAllocationsByEmployee(user.Id);
+
+            //Map all that needs mapping
+            var mappedLeaveRequests = _mapper.Map<List<LeaveRequestViewModel>>(leaveRequests);
+            var mappedLeaveAllocations = _mapper.Map<List<LeaveAllocationViewModel>>(leaveAllocations);
+
+            //Create a model
+            var model = new MyLeaveViewModel
+            {
+                LeaveAllocations = mappedLeaveAllocations,
+                LeaveRequests = mappedLeaveRequests
+            };
+
+
+            return View(model);
+        }
+
         // GET: LeaveRequestController/Details/5
         public ActionResult Details(int id)
         {

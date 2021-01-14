@@ -63,5 +63,12 @@ namespace LeaveManagementWebApp.Repository
             _db.LeaveRequests.Update(entity);
             return Save();
         }
+
+        public ICollection<LeaveRequest> FindByEmployee(string employeeId)
+        {
+            return _db.LeaveRequests
+                .Where(request => request.RequestingEmployeeId == employeeId)
+                .ToList();
+        }
     }
 }
