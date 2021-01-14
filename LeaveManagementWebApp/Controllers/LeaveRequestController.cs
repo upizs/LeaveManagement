@@ -63,7 +63,64 @@ namespace LeaveManagementWebApp.Controllers
         // GET: LeaveRequestController/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            var leaveRequest = _leaveRequestRepo.FindById(id);
+            var model = _mapper.Map<LeaveRequestViewModel>(leaveRequest);
+            return View(model);
+        }
+
+        public ActionResult ApproveRequest(int id)
+        {
+            try
+            {
+                var user = _userManager.GetUserAsync(User).Result;
+                var leaveRequest = _leaveRequestRepo.FindById(id);
+                var employeeId = leaveRequest.RequestingEmployeeId;
+                var leaveTypeId = leaveRequest.LeaveTypeId;
+                var leaveAllocation = _allocationRepo.GetLeaveAllocationsByEmployeeAndType(employeeId, leaveTypeId);
+                int daysRequested = (int)(leaveRequest.EndDate - leaveRequest.StartDate).TotalDays;
+
+
+                leaveAllocation.NumberOfDays -= daysRequested;
+                _allocationRepo.Update(leaveAllocation);
+
+                leaveRequest.Approved = true;
+                leaveRequest.ApprovedById =user.Id;
+                leaveRequest.DateActioned = DateTime.Now;
+
+                _leaveRequestRepo.Update(leaveRequest);
+
+                return RedirectToAction(nameof(Index), "Home");
+               
+            }
+            
+            catch (Exception)
+            {
+                
+                return RedirectToAction(nameof(Index), "Home");
+            }
+        }
+
+            
+        public ActionResult RejectRequest(int id)
+        {
+            try
+            {
+                var leaveRequest = _leaveRequestRepo.FindById(id);
+                leaveRequest.Approved = false;
+                leaveRequest.ApprovedById = _userManager.GetUserAsync(User).Result.Id;
+                leaveRequest.DateActioned = DateTime.Now;
+
+                _leaveRequestRepo.Update(leaveRequest);
+
+                return RedirectToAction(nameof(Index));
+
+            }
+
+            catch (Exception)
+            {
+
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         // GET: LeaveRequestController/Create
@@ -166,46 +223,5 @@ namespace LeaveManagementWebApp.Controllers
             }
         }
 
-        // GET: LeaveRequestController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: LeaveRequestController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: LeaveRequestController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: LeaveRequestController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
     }
 }

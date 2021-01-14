@@ -70,20 +70,20 @@ namespace LeaveManagementWebApp.Repository
                 .Any();
         }
 
-        public ICollection<LeaveAllocation> GetLeaveAllocationsByEmployee(string id)
+        public ICollection<LeaveAllocation> GetLeaveAllocationsByEmployee(string employeeId)
         {
             var period = DateTime.Now.Year;
             return FindAll()
-                .Where(allocation => allocation.EmployeeId == id && allocation.Period == period)
+                .Where(allocation => allocation.EmployeeId == employeeId && allocation.Period == period)
                 .ToList();
 
         }
 
-        public LeaveAllocation GetLeaveAllocationsByEmployeeAndType(string id, int leaveTypeId)
+        public LeaveAllocation GetLeaveAllocationsByEmployeeAndType(string employeeId, int leaveTypeId)
         {
             var period = DateTime.Now.Year;
             return FindAll()
-                .FirstOrDefault(allocation => allocation.EmployeeId == id
+                .FirstOrDefault(allocation => allocation.EmployeeId == employeeId
                         && allocation.Period == period
                         && allocation.LeaveTypeId == leaveTypeId);
         }
