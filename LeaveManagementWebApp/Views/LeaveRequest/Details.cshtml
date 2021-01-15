@@ -76,7 +76,7 @@ else
     </dl>
 </div>
 <div>
-    @if (Model.Approved == null)
+    @if (Model.Approved == null && Model.Canceled == null)
     {
         <a class="btn btn-success" asp-action="ApproveRequest" asp-route-id="@Model.Id">Approve</a>
         <a class="btn btn-danger" asp-action="RejectRequest" asp-route-id="@Model.Id">Reject</a>

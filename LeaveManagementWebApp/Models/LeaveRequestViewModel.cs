@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using LeaveManagementWebApp.Validations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -22,6 +23,7 @@ namespace LeaveManagementWebApp.Models
         public DateTime DateRequested { get; set; }
         public DateTime DateActioned { get; set; }
         public bool? Approved { get; set; }
+        public bool? Canceled { get; set; }
         public EmployeeViewModel ApprovedBy { get; set; }
         public string ApprovedById { get; set; }
     }
@@ -48,9 +50,11 @@ namespace LeaveManagementWebApp.Models
         //Will Convert it in Controller
         [Display(Name ="Start Date")]
         [Required]
+        [StartDateValidation]
         public string StartDate { get; set; }
         [Display(Name = "End Date")]
         [Required]
+        [EndDateValidation]
         public string EndDate { get; set; }
         public IEnumerable<SelectListItem> LeaveTypes { get; set; }
         public int LeaveTypeId { get; set; }

@@ -22,6 +22,7 @@ namespace LeaveManagementWebApp.Data
         public DateTime DateRequested { get; set; }
         public DateTime DateActioned { get; set; }
         public bool? Approved { get; set; }
+        public bool? Canceled { get; set; }
         [ForeignKey("ApprovedById")]
         public Employee ApprovedBy { get; set; }
         public string ApprovedById { get; set; }

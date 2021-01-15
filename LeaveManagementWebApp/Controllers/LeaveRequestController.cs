@@ -82,6 +82,28 @@ namespace LeaveManagementWebApp.Controllers
             return View(model);
         }
 
+        public ActionResult CancelRequest(int id)
+        {
+            var leaveRequest = _leaveRequestRepo.FindById(id);
+
+            //if request was pending cancel without returning the days requested.
+            leaveRequest.Canceled = true;
+            _leaveRequestRepo.Save();
+
+
+            //however if it was Approved, return requested days to leaveAllocation
+            if (leaveRequest.Approved == true)
+            {
+                var leaveAllocation = _allocationRepo
+                    .GetLeaveAllocationsByEmployeeAndType(leaveRequest.RequestingEmployeeId, leaveRequest.LeaveTypeId);
+                int daysRequested = (int)(leaveRequest.EndDate - leaveRequest.StartDate).TotalDays;
+                leaveAllocation.NumberOfDays += daysRequested;
+                _allocationRepo.Save();
+            }
+
+            return RedirectToAction(nameof(MyLeave));
+        }
+
         // GET: LeaveRequestController/Details/5
         public ActionResult Details(int id)
         {
@@ -225,6 +247,7 @@ namespace LeaveManagementWebApp.Controllers
                     Approved = null,
                     DateRequested = DateTime.Now,
                     DateActioned = DateTime.Now
+                    
                     
                 };
                 var leaveRequest = _mapper.Map<LeaveRequest>(leaveRequestModel);

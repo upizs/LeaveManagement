@@ -70,15 +70,19 @@
                 {
                     <span class="badge badge-danger">Rejected</span>
                 }
+                else if (leaveRequest.Canceled == true)
+                {
+                    <span class="badge badge-secondary">Canceled</span>
+                }
                 else
                 {
-                    <span class="badge badge-secondary">Pending</span>
+                    <span class="badge badge-warning">Pending</span>
                 }
             </td>
             <td>
-                @if (leaveRequest.StartDate > DateTime.Now)
+                @if (leaveRequest.StartDate > DateTime.Now || leaveRequest.Canceled == true)
                 {
-                <a class="btn btn-danger" asp-action="Cancel" asp-route-id="@leaveRequest.Id" 
+                <a class="btn btn-danger" asp-action="CancelRequest" asp-route-id="@leaveRequest.Id" 
                    onclick="return confirm('Are you sure you want to cancel your request?')">
                 
                 <i class="fa fa-trash-o fa-lg"></i></a>
