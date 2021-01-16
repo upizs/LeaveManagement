@@ -23,7 +23,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Theme style -->
     <link rel="stylesheet" href="~/css/adminlte.min.css">
     <!--DataTables-->
-    <link rel="stylesheet" href="//cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="~/css/dataTables.bootstrap4.min.css" />
     <!--DatePicker-->
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <!--Custom-->
@@ -45,57 +45,57 @@ scratch. This page gets rid of all links and provides the needed markup only.
         </nav>
         <!-- /.navbar -->
     </div>
-        
-        <!-- Main Sidebar Container -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <!-- Brand Logo -->
-            <a href="#" class="brand-link">
-                <span class="brand-text font-weight-light">Leave Management System</span>
-            </a>
 
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <!-- Sidebar user panel (optional) -->
-                <partial name="_LoginPartial" />
-                <hr/>
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="#" class="brand-link">
+            <span class="brand-text font-weight-light">Leave Management System</span>
+        </a>
 
-                <!-- Sidebar Menu -->
-                <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                        <!-- Add icons to the links using the .nav-icon class
-     with font-awesome or any other icon font library -->
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar user panel (optional) -->
+            <partial name="_LoginPartial" />
+            <hr />
+
+            <!-- Sidebar Menu -->
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                    <!-- Add icons to the links using the .nav-icon class
+                    with font-awesome or any other icon font library -->
+                    <li class="nav-item">
+                        <a asp-area="" asp-controller="Home" asp-action="Index" class="nav-link">
+                            <i class="nav-icon fas fa-home"></i>
+                            <p>
+                                Home
+                            </p>
+                        </a>
+                    </li>
+                    @*Only for logged in users*@
+                    @if (SignInManager.IsSignedIn(User))
+                    {
                         <li class="nav-item">
-                            <a asp-area="" asp-controller="Home" asp-action="Index" class="nav-link">
-                                <i class="nav-icon fas fa-home"></i>
+                            <a asp-area="" asp-controller="LeaveRequest" asp-action="Create" class="nav-link">
+                                <i class="nav-icon fas fa-pen-alt"></i>
                                 <p>
-                                    Home
+                                    Apply For Leave
                                 </p>
                             </a>
                         </li>
-                        @*Only for logged in users*@
-                        @if (SignInManager.IsSignedIn(User))
-                        {
-                            <li class="nav-item">
-                                <a asp-area="" asp-controller="LeaveRequest" asp-action="Create" class="nav-link">
-                                    <i class="nav-icon fas fa-pen-alt"></i>
-                                    <p>
-                                        Apply For Leave
-                                    </p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a asp-area="" asp-controller="LeaveRequest" asp-action="MyLeave" class="nav-link">
-                                    <i class="nav-icon fas fa-book-open"></i>
-                                    <p>
-                                        My Leave
-                                    </p>
-                                </a>
-                            </li>
+                        <li class="nav-item">
+                            <a asp-area="" asp-controller="LeaveRequest" asp-action="MyLeave" class="nav-link">
+                                <i class="nav-icon fas fa-book-open"></i>
+                                <p>
+                                    My Leave
+                                </p>
+                            </a>
+                        </li>
 
-                            if (User.IsInRole("Administrator"))
-                            {
-                            <li class="nav-item has-treeview menu-open">
-                                <a href="#" class="nav-link active">
+                        if (User.IsInRole("Administrator"))
+                        {
+                            <li class="nav-item has-treeview ">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon fas fa-tachometer-alt"></i>
                                     <p>
                                         Manage
@@ -104,14 +104,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                 </a>
                                 <ul class="nav nav-treeview">
                                     <li class="nav-item">
-                                        <a asp-controller="LeaveTypes" asp-action="Index" class="nav-link active">
+                                        <a asp-controller="LeaveTypes" asp-action="Index" class="nav-link">
                                             <i class="fas fa-list nav-icon"></i>
                                             <p>Leave Types</p>
                                         </a>
                                     </li>
                                     <li class="nav-item">
                                         <a asp-controller="LeaveAllocation" asp-action="Index" class="nav-link">
-                                            <i class="fas fa-angelist nav-icon"></i>
+                                            <i class="fas fa-user-plus nav-icon"></i>
                                             <p>Leave Allocations</p>
                                         </a>
                                     </li>
@@ -129,59 +129,68 @@ scratch. This page gets rid of all links and provides the needed markup only.
                                     </li>
                                 </ul>
                             </li>
-                            }
-
                         }
-                        </ul>
 
-                </nav>
-                <!-- /.sidebar-menu -->
-            </div>
-            <!-- /.sidebar -->
-        </aside>
+                    }
+                </ul>
 
-        <!-- Content Wrapper. Contains page content -->
-    
-        <div class="content-wrapper">
-            <div class="content">
-                <div class="container-fluid">
-                    @RenderBody()
-                </div>
-             </div>
+            </nav>
+            <!-- /.sidebar-menu -->
         </div>
-        <!-- /.content-wrapper -->
-                <!-- Control Sidebar -->
-                <aside class="control-sidebar control-sidebar-dark">
-                    <!-- Control sidebar content goes here -->
-                    <div class="p-3">
-                        <h5>Title</h5>
-                        <p>Sidebar content</p>
-                    </div>
-                </aside>
-                <!-- /.control-sidebar -->
-                <!-- Main Footer -->
-                <footer class="main-footer">
-                    <!-- To the right -->
-                    <div class="float-right d-none d-sm-inline">
-                        Styled by <a href="https://adminlte.io">AdminLTE.io</a>
-                    </div>
-                    <!-- Default to the left -->
-                    <strong>Copyright &copy; @DateTime.Now.Year .</strong> All rights reserved.
-                </footer>
-            
-            <!-- ./wrapper -->
-            <!-- REQUIRED SCRIPTS -->
-            <!-- jQuery -->
-            <script src="~/lib/jquery/dist/jquery.min.js"></script>
-            <!-- Bootstrap 4.0-->
-            <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-            <!-- AdminLTE App -->
-            <script src="~/js/adminlte.min.js"></script>
-            <!--Datatables-->
-            <script src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
-            <!--DatePicker-->
-            <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-            <!--Script Section-->
-            @RenderSection("Scripts", required: false)
+        <!-- /.sidebar -->
+    </aside>
+
+    <!-- Content Wrapper. Contains page content -->
+
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+
+            </div>
+        </div><!--/content-header-->
+        <!--Content-->
+        <div class="content">
+            <div class="container-fluid">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+    <!-- /.content-wrapper -->
+    <!-- Control Sidebar -->
+    <aside class="control-sidebar control-sidebar-dark">
+        <!-- Control sidebar content goes here -->
+        <div class="p-3">
+            <h5>Title</h5>
+            <p>Sidebar content</p>
+        </div>
+    </aside>
+    <!-- /.control-sidebar -->
+    <!-- Main Footer -->
+    <footer class="main-footer">
+        <!-- To the right -->
+        <div class="float-right d-none d-sm-inline">
+            Styled by <a href="https://adminlte.io">AdminLTE.io</a>
+        </div>
+        <!-- Default to the left -->
+        <strong>Copyright &copy; @DateTime.Now.Year .</strong> All rights reserved.
+    </footer>
+
+    <!-- ./wrapper -->
+    <!-- REQUIRED SCRIPTS -->
+    <!-- jQuery -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap 4.0-->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="~/js/adminlte.min.js"></script>
+    <!--Datatables-->
+    <script src="~/js/jquery.dataTables.min.js"></script>
+    <script src="~/js/dataTables.bootstrap4.min.js"></script>
+    <!--Custom-->
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <!--DatePicker-->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!--Script Section-->
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
