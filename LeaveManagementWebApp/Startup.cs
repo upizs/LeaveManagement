@@ -43,6 +43,9 @@ namespace LeaveManagementWebApp
             services.AddScoped<ILeaveAllocationRepository, LeaveAllocationRepository>();
             services.AddScoped<ILeaveRequestRepository, LeaveRequestRepository>();
 
+            //One unit of work for all Data models
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
+
             services.AddAutoMapper(typeof(Maps));
 
             //Set up the softest password options for easier registretion
