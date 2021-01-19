@@ -19,23 +19,17 @@ namespace LeaveManagementWebApp.Controllers
     {
         #region dependencies
 
-        private readonly ILeaveRequestRepository _leaveRequestRepo;
-        private readonly ILeaveTypeRepository _leaveTypeRepo;
-        private readonly ILeaveAllocationRepository _allocationRepo;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<Employee> _userManager;
 
         //Dependendy injuction
         public LeaveRequestController(
-            ILeaveRequestRepository leaveRequestRepo,
-            ILeaveTypeRepository leaveTypeRepo,
-            ILeaveAllocationRepository allocationRepo,
+            IUnitOfWork unitOfWork ,
             IMapper mapper,
             UserManager<Employee> userManager)
         {
-            _leaveRequestRepo = leaveRequestRepo;
-            _leaveTypeRepo = leaveTypeRepo;
-            _allocationRepo = allocationRepo;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
         }
@@ -46,7 +40,7 @@ namespace LeaveManagementWebApp.Controllers
         // GET: LeaveRequestController
         public async Task<ActionResult> Index()
         {
-            var leaveRequests = await _leaveRequestRepo.FindAll();
+            var leaveRequests = await _unitOfWork.LeaveReuqests.FindAll(); ;
             var leaveRequestsModel = _mapper.Map<List<LeaveRequestViewModel>>(leaveRequests);
             var model = new AdminLeaveRequestViewModel
             {
@@ -64,8 +58,8 @@ namespace LeaveManagementWebApp.Controllers
         {
             //Find and get all resources
             var user = await _userManager.GetUserAsync(User);
-            var leaveRequests = await _leaveRequestRepo.FindByEmployee(user.Id);
-            var leaveAllocations = await _allocationRepo.GetLeaveAllocationsByEmployee(user.Id);
+            var leaveRequests = await _unitOfWork.LeaveReuqests.FindAll(request => request.RequestingEmployeeId == user.Id);
+            var leaveAllocations = await _unitOfWork.LeaveAllocations.FindAll(allocation => allocation.EmployeeId == user.Id);
 
             //Map all that needs mapping
             var mappedLeaveRequests = _mapper.Map<List<LeaveRequestViewModel>>(leaveRequests);
@@ -84,21 +78,25 @@ namespace LeaveManagementWebApp.Controllers
 
         public async Task<ActionResult> CancelRequest(int id)
         {
-            var leaveRequest = await _leaveRequestRepo.FindById(id);
+            var leaveRequest = await _unitOfWork.LeaveReuqests.Find(request => request.Id == id);
 
             //if request was pending cancel without returning the days requested.
             leaveRequest.Canceled = true;
-            await _leaveRequestRepo.Save();
+            await _unitOfWork.Save();
 
 
             //however if it was Approved, return requested days to leaveAllocation
             if (leaveRequest.Approved == true)
             {
-                var leaveAllocation = await _allocationRepo
-                    .GetLeaveAllocationsByEmployeeAndType(leaveRequest.RequestingEmployeeId, leaveRequest.LeaveTypeId);
+                var period = DateTime.Now.Year;
+                var leaveAllocation = await _unitOfWork.LeaveAllocations
+                    .Find(allocation => allocation.EmployeeId == leaveRequest.RequestingEmployeeId
+                    && allocation.Period == period
+                    && allocation.LeaveTypeId == leaveRequest.LeaveTypeId) ;
+
                 int daysRequested = (int)(leaveRequest.EndDate - leaveRequest.StartDate).TotalDays;
                 leaveAllocation.NumberOfDays += daysRequested;
-                await _allocationRepo.Save();
+                await _unitOfWork.Save();
             }
 
             return RedirectToAction(nameof(MyLeave));
@@ -107,7 +105,7 @@ namespace LeaveManagementWebApp.Controllers
         // GET: LeaveRequestController/Details/5
         public async Task<ActionResult> Details(int id)
         {
-            var leaveRequest = await _leaveRequestRepo.FindById(id);
+            var leaveRequest = await _unitOfWork.LeaveReuqests.Find(request => request.Id == id);
             var model = _mapper.Map<LeaveRequestViewModel>(leaveRequest);
             return View(model);
         }
@@ -117,21 +115,25 @@ namespace LeaveManagementWebApp.Controllers
             try
             {
                 var user = await _userManager.GetUserAsync(User);
-                var leaveRequest = await _leaveRequestRepo.FindById(id);
+                var leaveRequest = await _unitOfWork.LeaveReuqests.Find(request => request.Id == id);
                 var employeeId = leaveRequest.RequestingEmployeeId;
                 var leaveTypeId = leaveRequest.LeaveTypeId;
-                var leaveAllocation = await _allocationRepo.GetLeaveAllocationsByEmployeeAndType(employeeId, leaveTypeId);
+                var period = DateTime.Now.Year;
+                var leaveAllocation = await _unitOfWork.LeaveAllocations
+                    .Find(allocation => allocation.EmployeeId == employeeId
+                                        && allocation.LeaveTypeId == leaveTypeId
+                                        && allocation.Period == period);
+
                 int daysRequested = (int)(leaveRequest.EndDate - leaveRequest.StartDate).TotalDays;
-
-
                 leaveAllocation.NumberOfDays -= daysRequested;
-                await _allocationRepo.Update(leaveAllocation);
 
                 leaveRequest.Approved = true;
                 leaveRequest.ApprovedById =user.Id;
                 leaveRequest.DateActioned = DateTime.Now;
 
-                await _leaveRequestRepo.Update(leaveRequest);
+                _unitOfWork.LeaveReuqests.Update(leaveRequest);
+                _unitOfWork.LeaveAllocations.Update(leaveAllocation);
+                await _unitOfWork.Save();
 
                 return RedirectToAction(nameof(Index), "Home");
                
@@ -149,14 +151,15 @@ namespace LeaveManagementWebApp.Controllers
         {
             try
             {
-                var leaveRequest = await _leaveRequestRepo.FindById(id);
+                var leaveRequest = await _unitOfWork.LeaveReuqests.Find(request => request.Id == id);
                 var user = await _userManager.GetUserAsync(User);
 
                 leaveRequest.Approved = false;
                 leaveRequest.ApprovedById = user.Id;
                 leaveRequest.DateActioned = DateTime.Now;
 
-                await _leaveRequestRepo.Update(leaveRequest);
+                _unitOfWork.LeaveReuqests.Update(leaveRequest);
+                await _unitOfWork.Save();
 
                 return RedirectToAction(nameof(Index));
 
@@ -172,7 +175,7 @@ namespace LeaveManagementWebApp.Controllers
         // GET: LeaveRequestController/Create
         public async Task<ActionResult> Create()
         {
-            var leaveTypes = await _leaveTypeRepo.FindAll();
+            var leaveTypes = await _unitOfWork.LeaveTypes.FindAll();
             var leaveTypesItems = leaveTypes.Select(type => new SelectListItem { 
                 Text = type.Name,
                 Value = type.Id.ToString()
@@ -202,8 +205,8 @@ namespace LeaveManagementWebApp.Controllers
                 //has to create the SelectListItem, 
                 //becasue otherwise the model would 
                 //return empty list in case of fail
-
-                var leaveTypes = await _leaveTypeRepo.FindAll();
+                
+                var leaveTypes = await _unitOfWork.LeaveTypes.FindAll();
                 var leaveTypesItems = leaveTypes.Select(type => new SelectListItem
                 {
                     Text = type.Name,
@@ -211,6 +214,7 @@ namespace LeaveManagementWebApp.Controllers
                 });
 
                 model.LeaveTypes = leaveTypesItems;
+                var period = DateTime.Now.Year;
 
                 //Check if valid
                 #region Validation
@@ -227,13 +231,16 @@ namespace LeaveManagementWebApp.Controllers
                 }
 
                 var employee = await _userManager.GetUserAsync(User);
-                var allocation = await _allocationRepo.GetLeaveAllocationsByEmployeeAndType(employee.Id, model.LeaveTypeId);
+                var leaveAllocation = await _unitOfWork.LeaveAllocations
+                    .Find(allocation => allocation.EmployeeId == employee.Id
+                                        && allocation.LeaveTypeId == model.LeaveTypeId
+                                        && allocation.Period == period);
                 int daysRequested = (int)(endDate.Date - startDate.Date).TotalDays;
 
-                if (daysRequested > allocation.NumberOfDays) 
+                if (daysRequested > leaveAllocation.NumberOfDays) 
                 {
-                    ModelState.AddModelError("", "You have requested more days for this allocation than you have. "
-                        + "You have " + allocation.NumberOfDays.ToString() + " days left");
+                    ModelState.AddModelError("", "You have requested more days for " + leaveAllocation.LeaveType.Name +  " than you have. "
+                        + "You have " + leaveAllocation.NumberOfDays.ToString() + " days left");
                     return View(model);
                 }
 
@@ -253,13 +260,10 @@ namespace LeaveManagementWebApp.Controllers
                     
                 };
                 var leaveRequest = _mapper.Map<LeaveRequest>(leaveRequestModel);
-                var success = await _leaveRequestRepo.Create(leaveRequest);
+                
+                await _unitOfWork.LeaveReuqests.Create(leaveRequest);
+                await _unitOfWork.Save();
 
-                if (!success)
-                {
-                    ModelState.AddModelError("", "Something went wrong");
-                    return View(model);
-                }
                 //Redirects to home index, because leaverequest index is admin only
                 return RedirectToAction(nameof(Index), "Home");
             }
