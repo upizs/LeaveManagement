@@ -40,7 +40,8 @@ namespace LeaveManagementWebApp.Controllers
         // GET: LeaveRequestController
         public async Task<ActionResult> Index()
         {
-            var leaveRequests = await _unitOfWork.LeaveReuqests.FindAll(); ;
+            var leaveRequests = await _unitOfWork.LeaveReuqests.FindAll(
+                includes : new List<string> {"RequestingEmployee", "LeaveType"});
             var leaveRequestsModel = _mapper.Map<List<LeaveRequestViewModel>>(leaveRequests);
             var model = new AdminLeaveRequestViewModel
             {
@@ -58,7 +59,10 @@ namespace LeaveManagementWebApp.Controllers
         {
             //Find and get all resources
             var user = await _userManager.GetUserAsync(User);
-            var leaveRequests = await _unitOfWork.LeaveReuqests.FindAll(request => request.RequestingEmployeeId == user.Id);
+            var leaveRequests = await _unitOfWork.LeaveReuqests.FindAll(
+                                        request => request.RequestingEmployeeId == user.Id,
+                                        includes : new List<string> { "LeaveType" }
+                                        );
             var leaveAllocations = await _unitOfWork.LeaveAllocations.FindAll(allocation => allocation.EmployeeId == user.Id);
 
             //Map all that needs mapping
@@ -105,7 +109,8 @@ namespace LeaveManagementWebApp.Controllers
         // GET: LeaveRequestController/Details/5
         public async Task<ActionResult> Details(int id)
         {
-            var leaveRequest = await _unitOfWork.LeaveReuqests.Find(request => request.Id == id);
+            var leaveRequest = await _unitOfWork.LeaveReuqests.Find(request => request.Id == id,
+             includes: new List<string> { "RequestingEmployee", "ApprovedBy", "LeaveType" });
             var model = _mapper.Map<LeaveRequestViewModel>(leaveRequest);
             return View(model);
         }
