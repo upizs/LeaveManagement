@@ -88,7 +88,7 @@ namespace LeaveManagementWebApp.Controllers
             var employee = await _userManager.FindByIdAsync(employeeId);
             var mappedEmployee = _mapper.Map<EmployeeViewModel>(employee);
             var allocations = await _unitOfWork.LeaveAllocations.FindAll(allocation => allocation.EmployeeId == employeeId, 
-                                                                         includes: new List<string> { "Employee" , "LeaveType" });
+                                                                         includes: new List<string> { "LeaveType" });
             var mappedAllocations = _mapper.Map<List<LeaveAllocationViewModel>>(allocations);
 
             var model = new ViewAllocationsViewModel

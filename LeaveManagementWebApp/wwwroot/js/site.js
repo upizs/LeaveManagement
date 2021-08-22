@@ -5,5 +5,5 @@
 
 $(document).ready(function () {
     $('#tblData').DataTable();
-    $(".datepicker").datepicker();
+    $(".datepicker").datepicker();  
 });
